@@ -58,7 +58,8 @@ sweeping edits — even when you're confident you could do it all in one pass.
 
 - A smaller diff is easier for a human (or a verifier) to actually check.
 - A narrower task gives you a tighter, more relevant context to reason over
-  (see `context-engineering.md`), which improves your own accuracy on it.
+  (see [`context-engineering.md`](./01-context-engineering.md)), which
+  improves your own accuracy on it.
 - If a task is naturally large, decompose it into a sequence of small,
   independently verifiable steps rather than attempting it as one big
   generation.

@@ -35,7 +35,7 @@ context on the next run.
 
 **Implication:** never assume you'll "remember this for later" unless you are
 actively writing it to a persistent store as you go (see
-[`knowledge-persistence.md`](./knowledge-persistence.md)). If a task depends
+[`knowledge-persistence.md`](./04-knowledge-persistence.md)). If a task depends
 on continuity across sessions, treat writing the state down as part of the
 task, not an optional nicety.
 

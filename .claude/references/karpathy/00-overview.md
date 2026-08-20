@@ -20,10 +20,10 @@ Write and read these docs as operating knowledge, not trivia.
 
 | File | Read this when... |
 |---|---|
-| [`context-engineering.md`](./context-engineering.md) | You are assembling, trimming, or deciding what goes into your own context window or a sub-agent's — i.e. almost every task. |
-| [`cognitive-limitations.md`](./cognitive-limitations.md) | You need to calibrate confidence, catch your own hallucinations, or decide whether to trust a claim (yours or the user's) without verification. |
-| [`agentic-discipline.md`](./agentic-discipline.md) | You are executing a multi-step task, writing/changing code, or deciding how much autonomy to take before checking in. |
-| [`knowledge-persistence.md`](./knowledge-persistence.md) | You are designing or operating a system where an agent maintains files, notes, or a knowledge base across sessions. |
+| [`context-engineering.md`](./01-context-engineering.md) | You are assembling, trimming, or deciding what goes into your own context window or a sub-agent's — i.e. almost every task. |
+| [`cognitive-limitations.md`](./02-cognitive-limitations.md) | You need to calibrate confidence, catch your own hallucinations, or decide whether to trust a claim (yours or the user's) without verification. |
+| [`agentic-discipline.md`](./03-agentic-discipline.md) | You are executing a multi-step task, writing/changing code, or deciding how much autonomy to take before checking in. |
+| [`knowledge-persistence.md`](./04-knowledge-persistence.md) | You are designing or operating a system where an agent maintains files, notes, or a knowledge base across sessions. |
 
 ## One-paragraph summary of the philosophy
 

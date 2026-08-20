@@ -3,8 +3,8 @@
 Applies to: any system where you (or a chain of agents) accumulate knowledge,
 notes, or state across more than one session, and need it to actually compound
 instead of being rebuilt from scratch every time. This directly follows from
-`cognitive-limitations.md` — you have no memory of your own, so persistence
-has to be a deliberate, external, file-based system.
+[`cognitive-limitations.md`](./02-cognitive-limitations.md) — you have no memory 
+of your own, so persistence has to be a deliberate, external, file-based system.
 
 ## The problem with re-deriving everything every time
 
@@ -50,7 +50,7 @@ blur them — the separation is what keeps the system trustworthy.
   contradictions, live cross-links) in a way a human-maintained wiki
   typically can't sustain.
 - Because you have no persistent memory of your own (see
-  `cognitive-limitations.md`), the store *is* your memory across sessions.
+  [`cognitive-limitations.md`](./02-cognitive-limitations.md)), the store *is* your memory across sessions.
   Treat writing to it with the seriousness that implies — an unrecorded
   synthesis is a synthesis that will have to be redone.
 

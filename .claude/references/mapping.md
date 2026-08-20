@@ -48,10 +48,16 @@ of its row in the table below.
 
 | Reference                                                        |
 |------------------------------------------------------------------|
-| [`context-engineering.md`](karpathy/context-engineering.md)      |
-| [`cognitive-limitations.md`](karpathy/cognitive-limitations.md)  |
-| [`agentic-discipline.md`](karpathy/agentic-discipline.md)        |
-| [`knowledge-persistence.md`](karpathy/knowledge-persistence.md)  |
+| [`karpathy-overview`](karpathy/00-overview.md)|
+| [`context-engineering`](karpathy/01-context-engineering.md)|
+| [`cognitive-limitations`](karpathy/02-cognitive-limitations.md)|
+| [`agentic-discipline`](karpathy/03-agentic-discipline.md)|
+| [`knowledge-persistence`](karpathy/04-knowledge-persistence.md)|
+| [`graphify-overview`](graphify/00-overview.md)|
+| [`cli-reference`](graphify/01-cli-reference.md)|
+| [`agent-workflow`](graphify/02-agent-workflow.md)|
+| [`repo-conventions`](graphify/03-repo-conventions.md)|
+| [`troubleshooting`](graphify/04-troubleshooting.md)|
 
 ---
 
