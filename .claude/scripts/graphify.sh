@@ -4,9 +4,9 @@
 #
 # Installs Graphify (https://github.com/Graphify-Labs/graphify) if needed,
 # builds or incrementally updates a knowledge graph of this codebase, and
-# wires Graphify into Claude Code as an always-on knowledge source.
+# installs the Graphify skill for Claude Code.
 #
-# Graphify owns its own output directory at the repository root:
+# Graphify owns its output directory at the repository root:
 #
 #   graphify-out/
 #
@@ -16,17 +16,22 @@
 #
 # RE-RUNNING THIS SCRIPT IS THE UPDATE PATH.
 # If graphify-out/graph.json already exists, this script runs an incremental
-# `graphify update` instead of a full `graphify extract`.
+# Graphify update instead of a full Graphify extraction.
+#
+# IMPORTANT:
+#   This script does NOT run "graphify claude install --project".
+#   Therefore it does NOT create or modify CLAUDE.md or install Graphify hooks.
 #
 # Usage:
-#   .claude/scripts/graphify.sh              # local-only, code AST, no API key
-#   .claude/scripts/graphify.sh --full       # + semantic pass over docs/PDFs/
-#                                             #   images (needs an LLM API key)
-#   .claude/scripts/graphify.sh --force      # overwrite even if graph shrinks
+#   .claude/scripts/graphify.sh
+#   .claude/scripts/graphify.sh --full
+#   .claude/scripts/graphify.sh --force
 #   .claude/scripts/graphify.sh --full --force
 #
-# Env (only read when --full is used and no key is already exported):
-#   ANTHROPIC_API_KEY, GEMINI_API_KEY / GOOGLE_API_KEY, OPENAI_API_KEY
+# Environment variables used by --full:
+#   ANTHROPIC_API_KEY
+#   GEMINI_API_KEY / GOOGLE_API_KEY
+#   OPENAI_API_KEY
 #
 
 set -euo pipefail
@@ -35,8 +40,6 @@ set -euo pipefail
 # 0. Resolve paths
 # ---------------------------------------------------------------------------
 
-# Prefer git's own idea of the repo root (robust to being invoked from any
-# subdirectory); fall back to walking up from this script's location.
 SCRIPT_DIR="$(
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &&
     pwd -P
@@ -93,7 +96,7 @@ warn() {
 }
 
 # ---------------------------------------------------------------------------
-# 1. Install graphify + dependencies if not already present
+# 1. Install Graphify and dependencies if needed
 # ---------------------------------------------------------------------------
 
 ensure_python() {
@@ -103,6 +106,7 @@ ensure_python() {
   fi
 
   local pyver
+
   pyver="$(
     python3 -c \
       'import sys; print("%d.%d" % sys.version_info[:2])'
@@ -112,7 +116,8 @@ ensure_python() {
     3.10|3.11|3.12|3.13|3.14)
       ;;
     *)
-      warn "system python3 is $pyver (graphify needs 3.10+ to run) — harmless if uv installs its own; only matters if 'uv tool install' falls back to this interpreter."
+      warn "system python3 is $pyver. Graphify needs Python 3.10+."
+      warn "This is harmless if uv installs its own Python interpreter."
       ;;
   esac
 }
@@ -122,32 +127,34 @@ ensure_uv() {
     return
   fi
 
-  log "uv not found — installing it (astral.sh installer)"
+  log "uv not found — installing it"
 
   curl -LsSf https://astral.sh/uv/install.sh | sh
 
   export PATH="$HOME/.local/bin:$PATH"
 
   if ! command -v uv >/dev/null 2>&1; then
-    warn "uv installed but not on PATH yet. Run 'uv tool update-shell', open a new terminal, and re-run this script."
+    warn "uv was installed but is not available on PATH yet."
+    warn "Run 'uv tool update-shell', open a new terminal, and re-run this script."
     exit 1
   fi
 }
 
 ensure_graphify() {
   if command -v graphify >/dev/null 2>&1; then
-    log "graphify already installed ($(graphify --version 2>/dev/null || echo present))"
+    log "Graphify already installed ($(graphify --version 2>/dev/null || echo present))"
     return
   fi
 
-  log "Installing graphify (PyPI package: graphifyy)"
+  log "Installing Graphify"
 
   uv tool install graphifyy
 
   export PATH="$HOME/.local/bin:$PATH"
 
   if ! command -v graphify >/dev/null 2>&1; then
-    warn "graphify installed but not on PATH yet. Run 'uv tool update-shell', open a new terminal, and re-run this script."
+    warn "Graphify was installed but is not available on PATH yet."
+    warn "Run 'uv tool update-shell', open a new terminal, and re-run this script."
     exit 1
   fi
 }
@@ -161,14 +168,6 @@ ensure_graphify
 # ---------------------------------------------------------------------------
 # 2. Ignore Graphify's own output
 # ---------------------------------------------------------------------------
-#
-# Graphify writes its output to:
-#
-#   <repo-root>/graphify-out/
-#
-# We don't move or symlink this directory. We simply make sure the generated
-# graph doesn't become part of the graph itself or accidentally get committed.
-#
 
 if [ ! -f "$IGNORE_FILE" ] || ! grep -qxF 'graphify-out/' "$IGNORE_FILE" 2>/dev/null; then
   {
@@ -181,7 +180,7 @@ if [ ! -f "$IGNORE_FILE" ] || ! grep -qxF 'graphify-out/' "$IGNORE_FILE" 2>/dev/
 fi
 
 # ---------------------------------------------------------------------------
-# 3. Build the graph (first run) or update it (subsequent runs)
+# 3. Determine backend
 # ---------------------------------------------------------------------------
 
 cd "$REPO_ROOT"
@@ -189,39 +188,51 @@ cd "$REPO_ROOT"
 BACKEND_FLAG=""
 
 if [ "$MODE" = "full" ]; then
+
   if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
     BACKEND_FLAG="--backend claude"
+
   elif [ -n "${GEMINI_API_KEY:-}${GOOGLE_API_KEY:-}" ]; then
     BACKEND_FLAG="--backend gemini"
+
   elif [ -n "${OPENAI_API_KEY:-}" ]; then
     BACKEND_FLAG="--backend openai"
+
   else
-    warn "No ANTHROPIC_API_KEY / GEMINI_API_KEY / OPENAI_API_KEY set for --full extraction."
-    warn "Falling back to --code-only (local AST parsing, no docs/PDFs/images, no API key needed)."
+    warn "No LLM API key found for full extraction."
+    warn "Falling back to code-only extraction."
 
     MODE="code-only"
   fi
 fi
 
-if [ -f "$GRAPH_JSON" ]; then
-  log "Existing graph found at graphify-out/graph.json — running incremental update"
+# ---------------------------------------------------------------------------
+# 4. Build or update the graph
+# ---------------------------------------------------------------------------
 
-  if [ "$MODE" = "full" ]; then
-    log "Full mode requested; Graphify will update using its configured backend"
-  fi
+if [ -f "$GRAPH_JSON" ]; then
+
+  log "Existing graph found at graphify-out/graph.json"
+  log "Running incremental Graphify update"
 
   # shellcheck disable=SC2086
   graphify update "$REPO_ROOT" $FORCE_FLAG
 
 else
-  log "No existing graph — running full extraction (mode: $MODE)"
+
+  log "No existing graph found"
+  log "Running full extraction (mode: $MODE)"
 
   if [ "$MODE" = "code-only" ]; then
+
     # shellcheck disable=SC2086
     graphify extract "$REPO_ROOT" --code-only $FORCE_FLAG
+
   else
+
     # shellcheck disable=SC2086
     graphify extract "$REPO_ROOT" $BACKEND_FLAG $FORCE_FLAG
+
   fi
 fi
 
@@ -229,19 +240,29 @@ fi
 printf '%s\n' "$MODE" > "$MODE_FILE"
 
 # ---------------------------------------------------------------------------
-# 4. Make Claude Code always consult the graph
+# 5. Register the Graphify skill with Claude Code
 # ---------------------------------------------------------------------------
+#
+# IMPORTANT:
+#
+# We intentionally do NOT run:
+#
+#   graphify claude install --project
+#
+# That command can modify Claude Code project configuration such as
+# CLAUDE.md and hooks.
+#
+# We only install the Graphify skill.
+#
 
-log "Registering the /graphify skill with Claude Code (project-scoped)"
+log "Registering the /graphify skill with Claude Code"
 
 graphify install --project
-
-log "Enabling always-on graph guidance (CLAUDE.md + PreToolUse hook, project-scoped)"
 
 graphify claude install --project
 
 # ---------------------------------------------------------------------------
-# 5. Done
+# 6. Done
 # ---------------------------------------------------------------------------
 
 log "Done."
@@ -249,12 +270,12 @@ log "Done."
 echo
 echo "  Report:  graphify-out/GRAPH_REPORT.md"
 echo "  Graph:   graphify-out/graph.json"
-echo "  Visual:  graphify-out/graph.html   (open in a browser)"
+echo "  Visual:  graphify-out/graph.html"
+echo "  Skill:   /graphify"
 echo
-echo "Claude will now be nudged to run 'graphify query \"<question>\"' before"
-echo "grepping or reading files one by one."
+echo "  CLAUDE.md was not created or modified."
+echo "  Graphify hooks were not installed."
 echo
-echo "Re-run this script (including after a git pull) to refresh the graph"
-echo "incrementally:"
+echo "Re-run this script to refresh the graph incrementally:"
 echo
-echo "  .claude/scripts/graphify.sh"`
+echo "  .claude/scripts/graphify.sh"
