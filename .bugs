@@ -1,0 +1,73 @@
+1. sometimes the /dig skill does not follow the 'one question per round' rule, example:
+
+```md
+❯ /dig I want a create a skill to run after dig skill job is done, i want it to be like product manager, all the decisions that is made in dig skill must be transformed into an actionable      
+product requirement definition what in scope and what's not, what is your idea, let's brainstorm together.                                                                                       
+                                                                                                                                                                                                 
+  Read 1 file (ctrl+o to expand)                                                                                                                                                                 
+                                                                                                                                                                                               
+⏺ Per the reference mapping algorithm: the dig skill has no row in the Per-Skill table, so I'll warn about that but proceed with the Always Load set.                                            
+                                
+  Read 4 files (ctrl+o to expand)                                                                                                                                                                
+                                                                                                                                                                                                 
+⏺ Good reference load — now let's talk through the idea.
+                                                                                                                                                                                                 
+  Warning: The dig skill has no entry in the reference mapping's Per-Skill table. When this new skill is created, it should be added to that table so it gets the right references automatically.
+                                                                                                                                                                                                 
+---
+My read of what you're describing:                                                                                                                                                             
+                                                                                                                                                                                               
+  dig ends with an Alignment Signal — three concrete artifacts:                                                                                                                                  
+  1. Assumptions readback
+  2. Open questions
+  3. Decision log
+
+  Your new skill takes those three things and transforms them into a Product Requirement Definition — a durable, actionable artifact with clear in/out scope, acceptance criteria, and explicit
+  treatment of the open questions.
+
+  Where I'd focus the design conversation:
+
+  1. Trigger model — how does this skill get invoked?
+  - Option A: Explicit chain — after dig completes, you manually invoke /pm with a reference to the dig conversation/summary
+  - Option B: Hook-style — dig's completion signals the PM skill to run automatically (would need hook infrastructure)
+  - Option C: Pass-through — dig outputs a structured file, PM reads that file as its input
+
+  My recommendation: Option C — a file-based handoff is the most durable, allows re-runs if dig output changes, and doesn't require complex invocation plumbing. dig writes a dig-output.json (or
+   .md summary), PM reads it.
+
+  2. What "product manager" means precisely — two distinct roles:
+  - Requirements writer — structures decisions into a clean PRD with explicit scope boundary
+  - Contradiction auditor — looks at dig's assumption log and flags any that were contradicted, any open questions that block implementation, or any decisions that are underspecified
+
+  I'd lean into both. The second is higher-value and harder to automate — that's where the PM skill actually adds judgment, not just formatting.                                                 
+   
+  3. How to handle dig's open questions:                                                                                                                                                         
+  These are the most important inputs — they're the things blocking the next stage. The PM skill should either:                                                                                
+  - Explicitly document them as "must resolve before implementation" with a recommendation
+  - Or, if they CAN be resolved by reasonable inference, note that inference and mark it as "assumed unless challenged"
+
+  4. Output artifact — what file format and structure:
+  I'd suggest a structured markdown file with clear sections:
+
+  # PRD: [Feature Name]
+
+  ## Problem Statement
+  ## In Scope
+  ## Out of Scope
+  ## User Stories / Use Cases
+  ## Acceptance Criteria
+  ## Assumptions (from dig)
+  ## Open Questions (must resolve before dev)
+  ## Constraints
+  ## Dependencies
+  ## Decision Log (why we made each choice)
+
+  Key question for you:
+
+  Before we go further — is this skill meant to be fully automated (reads dig output, produces PRD with no human input), or does it run as a semi-structured interview where it asks clarifying
+  questions to fill gaps before producing the artifact?
+
+  Those are very different architectures.
+
+✻ Sautéed for 33s
+```
