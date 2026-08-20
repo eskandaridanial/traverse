@@ -43,7 +43,7 @@ Used to revisit one area of a problem already interviewed.
    to focus on, only ask if `<area>` was omitted.
 3. Run a short, targeted interview scoped only to that area, using the Questioning
    Rules below.
-4. On completion, merge the new/changed assumptions, open questions, and decisions
+4. On completion, merge the new/changed assumptions, decisions, and open questions
    into the existing result file rather than overwriting unrelated parts of it.
 
 ## Codebase Exploration
@@ -61,27 +61,26 @@ before treating it as final:
 > sound right?"
 
 This confirm-immediately pattern is specifically for facts pulled from the codebase.
-It's distinct from Assumption Tracking below, which covers claims and implications
-that arise from the conversation itself.
+It's distinct from Assumption Tracking in the Socratic reference, which covers claims
+and implications that arise from the conversation itself.
 
 This is a **read-only skill**: no file in the codebase is ever modified.
 
 ## Questioning Rules
 
-- **One question per round.** This is a pacing limit, not a cap — run as many rounds
-  as needed until the completeness checklist below passes. Each item in the Question
-  Repertoire below is itself one question when used; don't bundle several into one
-  round to compensate.
+The full Socratic questioning framework is in the [Socratic reference](dig/01-socratic.md).
+Key points for dig interviews:
+
+- **One question per round — HARD CONSTRAINT.** Ask exactly ONE question, then STOP
+  and wait for the answer. Do not continue until the user responds.
 - Every question must include:
-  - **Why it matters** — the downstream impact on implementation or design
-  - **Options** — 2–4 concrete choices that fit the problem; do not manufacture
-    meaningless options to satisfy the format
+  - **Why it matters** — downstream impact on implementation or design
+  - **Options** — 2–4 concrete choices (not manufactured; fit the problem)
   - **A recommended answer** — your best read, stated clearly
-- Challenge assumptions directly. If the human's input implies a questionable
-  approach, say so and explain why.
+- Challenge assumptions directly. If the human's input implies a questionable approach,
+  say so and explain why.
 - Do not let the conversation drift. Acknowledge tangents and redirect.
-- Do not accept vague answers. If an answer is unclear or incomplete, reframe the
-  question more tightly.
+- Do not accept vague answers. If an answer is unclear or incomplete, reframe tighter.
 
 ### Unacceptable Answers
 
@@ -90,73 +89,45 @@ Reject these when they materially affect implementation:
 > "whatever is best", "standard", "probably", "make it scalable",
 > "normal behavior", "it depends", "use your judgment"
 
-Instead, narrow the decision. For example:
+Narrow the decision instead. For example:
 
 > "`Scalable` is not specific enough. The real choice is whether we optimize for
 > current traffic or explicitly design for future horizontal scaling."
 
-### Challenging Assumptions
+### Contradiction Flag
 
-When the human states or implies an assumption, surface it explicitly:
-
-> "You mentioned X. I want to challenge that — doing X means Y and Z downstream.
-> Are you sure X is the right call, or would [alternative] serve you better?"
-
-Do not accept the first answer if it is underspecified. Push until the answer is
-concrete and its implications are understood by both sides.
-
-Challenge assumptions that add unnecessary complexity, risk incorrect behavior,
-create operational risk, or increase future migration cost.
-
-### Assumption Tracking
-
-Track all stated or implied assumptions from the conversation silently as the
-interview progresses. Do not surface them during questioning — hold them privately
-until the alignment signal, unless a contradiction forces an earlier check-in. When
-a new answer contradicts an earlier assumption, note it internally as a
-**contradiction flag** and raise it at the next natural pause:
+When a new answer contradicts an earlier assumption, raise it at the next natural pause:
 
 > "I want to revisit something — earlier you assumed X, but just now said Y.
 > Which is it?"
 
 Do not interrupt mid-flow; wait for a natural break point before flagging.
 
-## Question Repertoire
-
-For major decisions (new service, schema change, API contract, architectural shift),
-deploy these question types deliberately — each is asked on its own, respecting the
-one-question-per-round rule above:
-
-**Inversion questions:**
-- "What if we did the opposite?"
-- "What would have to be true for this to fail?"
-- "What's the cheapest way to prove this is wrong?"
-
-**Pre-mortems:**
-- "This fails in production — what went wrong?"
-- "If we ship this and it causes problems a year from now, what will we wish we'd asked now?"
-
-**Dependency questions:**
-- "What does this require to be true?"
-- "What else changes if this changes?"
-- "What would break if we did this?"
-
-## Depth Enforcement
-
-Do not accept half-answers. If an answer is surface-level and you sense there's
-more beneath it:
-
-- Push until the answer is genuinely complete.
-- If the human deflects, reframe the question more tightly.
-- If they explicitly refuse, note it as a **deferred** open question and continue —
-  don't block the whole interview on one holdout.
-
 ## Alignment Signal
 
-When all questions are resolved, state it explicitly:
+When all questions are resolved, state it explicitly using this format:
 
-> "I think we have everything we need. Here is what I understand we agreed on:
-> [brief bullet summary]. Does anything need to change?"
+```
+⏺ I think we have everything we need. Here is what I understand we agreed on:
+
+  - [Bug/Problem being addressed]
+  - [Scope of the fix]
+  - [Fix approach]
+
+  Assumptions:
+  - [assumption 1]
+  - [assumption 2]
+
+  Open Questions:
+  - [question 1] (status: deferred)
+  - [question 2] (status: deferred)
+
+  Decisions:
+  - [decision 1] — [rationale]
+  - [decision 2] — [rationale]
+
+  Does anything need to change?
+```
 
 Wait for the human to confirm, correct, or add. Proceed only after explicit
 confirmation.
@@ -224,8 +195,8 @@ overwriting it wholesale.
 
 ## Completeness Checklist
 
-Before ending the interview, verify every applicable item internally. Do not move
-forward until all that apply are resolved:
+The framing checklist in the [problem framing reference](dig/02-framing.md) underpins
+this checklist. Before ending the interview, verify every applicable item:
 
 - [ ] The goal is stated unambiguously
 - [ ] The scope boundary is clear — what is in and what is out
@@ -238,6 +209,28 @@ forward until all that apply are resolved:
 
 In Focus Mode, apply this checklist only to the focused area — items outside that
 area are already covered by the prior session.
+
+## Question Repertoire
+
+For major decisions (new service, schema change, API contract, architectural shift),
+deploy these question types — each asked separately, respecting the one-question rule:
+
+**Inversion questions:**
+- "What if we did the opposite?"
+- "What would have to be true for this to fail?"
+- "What's the cheapest way to prove this is wrong?"
+
+**Pre-mortems:**
+- "This fails in production — what went wrong?"
+- "If we ship this and it causes problems a year from now, what will we wish we'd asked now?"
+
+**Dependency questions:**
+- "What does this require to be true?"
+- "What else changes if this changes?"
+- "What would break if we did this?"
+
+The full pre-mortem methodology and failure mode categories are in the
+[pre-mortem reference](dig/03-premortem.md).
 
 ## Examples
 

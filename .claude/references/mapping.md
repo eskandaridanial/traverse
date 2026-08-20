@@ -69,7 +69,7 @@ covered and does not need to be repeated per row.
 
 | Skill              | Additional References                                      |
 |--------------------|------------------------------------------------------------|
-|                    |                                                            |
+| dig | [`dig-socratic`](dig/01-socratic.md), [`dig-framing`](dig/02-framing.md), [`dig-premortem`](dig/03-premortem.md) |
 
 ---
 
