@@ -6,8 +6,8 @@ description: Interrogate the human relentlessly until every ambiguity is resolve
 # References
 
 > Before doing anything else, read [`references/mapping.md`](../../references/mapping.md) 
-  and follow its algorithm to load your required references. Do not proceed with the
-  instructions below until that's complete.
+> and follow its algorithm to load your required references. Do not proceed with the
+> instructions below until that's complete.
 
 ## Purpose
 
@@ -17,10 +17,10 @@ built and why.
 
 ## Arguments
 
-| Argument     | Required | Description                                                         |
-|------- ------|----------|---------------------------------------------------------------------|
-| `<problem>`  | Yes      | The problem, question, or goal to clarify                           |
-| --focus / -f | No       | Re-interview on one specific area of a previously discussed problem |
+| Argument              | Required | Description                                                         |
+|-----------------------|----------|---------------------------------------------------------------------|
+| `<problem>`           | Yes      | The problem, question, or goal to clarify                           |
+| --focus / -f `<area>` | No       | Re-interview on one specific area of a previously discussed problem |
 
 ## Modes
 
@@ -50,7 +50,7 @@ before treating it as final:
 > I'll assume this is the right place unless you tell me otherwise — does that
 > sound right?"
 
-This is a **read-only stage**, no file in the codebase is ever modified.
+This is a **read-only skill**, no file in the codebase is ever modified.
 
 ## Questioning Rules
 
@@ -144,6 +144,51 @@ The alignment signal outputs three things:
 1. **Assumptions readback** — all assumptions surfaced and flagged for confirmation
 2. **Open questions** — questions that weren't fully resolved, to be decided before proceeding
 3. **Decision log** — what was decided and why, as a durable artifact the human can refer to or hand off
+
+## Result Output
+
+When alignment is confirmed, write the interview result to disk automatically.
+
+**Output path:** `.result/<slugified-problem>/dig-result.json`
+
+**Session name derivation:** Slugify the `<problem>` string — lowercase, spaces to dashes, strip non-alphanumeric except dashes.
+
+**Example:**
+- Problem: `change auth handling`
+- Output: `.result/change-auth/dig-result.json`
+
+**JSON schema:**
+
+```json
+{
+  "sessionName": "change-auth",
+  "problem": "change auth handling",
+  "completedAt": "<ISO8601 timestamp>",
+  "assumptions": [
+    {
+      "statement": "...",
+      "status": "confirmed | challenged | contradicted"
+    }
+  ],
+  "openQuestions": [
+    {
+      "question": "...",
+      "status": "resolved | deferred"
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "...",
+      "rationale": "...",
+      "alternativesConsidered": ["..."]
+    }
+  ]
+}
+```
+
+**Write trigger:** After alignment signal confirmation (human confirms the summary).
+
+---
 
 ## Completeness Checklist
 
