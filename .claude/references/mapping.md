@@ -58,6 +58,7 @@ of its row in the table below.
 | [`agent-workflow`](graphify/02-agent-workflow.md)|
 | [`repo-conventions`](graphify/03-repo-conventions.md)|
 | [`troubleshooting`](graphify/04-troubleshooting.md)|
+| [`karpathy-guideline`](guideline/04-karpathy.md)|
 
 ---
 
@@ -69,7 +70,7 @@ covered and does not need to be repeated per row.
 
 | Skill              | Additional References                                      |
 |--------------------|------------------------------------------------------------|
-| dig | [`dig-socratic`](dig/01-socratic.md), [`dig-framing`](dig/02-framing.md), [`dig-premortem`](dig/03-premortem.md) |
+| dig | [`dig-socratic`](guideline/01-socratic.md), [`dig-framing`](guideline/02-framing.md), [`dig-premortem`](guideline/03-premortem.md) |
 
 ---
 
